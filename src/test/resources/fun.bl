@@ -1,0 +1,6 @@
+;; check if we can properly define functions
+(defun main ())
+
+(defun say-hello (name))
+
+(defun add (a b))

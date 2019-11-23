@@ -61,6 +61,10 @@ WHITESPACE
    : (' ' | '\n' | '\t' | '\r')+ -> skip
    ;
 
+COMMENT
+    : ';' ~[\r\n]* -> skip
+    ;
+
 NUMBER
    : ('+' | '-')? (DIGIT)+ ('.' (DIGIT)+)?
    ;
