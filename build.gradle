@@ -2,12 +2,17 @@ plugins {
     id 'java'
 }
 
-group 'blisp'
+group 'org.blisp'
 version '1.0-SNAPSHOT'
 
+apply plugin: 'java'
 apply plugin: 'antlr'
 
 sourceCompatibility = 1.8
+
+generateGrammarSource {
+    arguments << "-lib" << "src/main/antlr/org/blisp"
+}
 
 repositories {
     mavenCentral()

@@ -26,7 +26,11 @@ THE SOFTWARE.
 /*
 Port to Antlr4 by Tom Everett
 */
-grammar blisp;
+grammar Blisp;
+
+@header {
+    package org.blisp;
+}
 
 sexpr
    : item* EOF
