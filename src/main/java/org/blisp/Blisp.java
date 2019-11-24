@@ -16,7 +16,7 @@ public final class Blisp {
         BlispLexer lexer = new BlispLexer(input);
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         BlispParser parser = new BlispParser(tokens);
-        ParseTree tree = parser.sexpr();
+        ParseTree tree = parser.program();
 
         return tree;
     }

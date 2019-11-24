@@ -32,6 +32,18 @@ grammar Blisp;
     package org.blisp;
 }
 
+program
+   : (fundecl | vardecl)* EOF
+   ;
+
+fundecl
+   : LPAREN DEFINE SYMBOL list list RPAREN
+   ;
+
+vardecl
+   : LPAREN DEFINE SYMBOL list RPAREN
+   ;
+
 sexpr
    : item* EOF
    ;
@@ -51,6 +63,10 @@ atom
    | SYMBOL
    | NUMBER
    | DOT
+   ;
+
+DEFINE
+   : 'define'
    ;
 
 STRING
