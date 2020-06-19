@@ -43,13 +43,13 @@ public final class Blisp {
         Class c = parseStream(iStream);
         ByteCode classBytes = c.codeGen("fun");
 
-        FileOutputStream output = new FileOutputStream(String.format("/home/frengel/%s.class", classBytes.moduleName));
+        FileOutputStream output = new FileOutputStream(String.format("%s.class", classBytes.moduleName));
         output.write(classBytes.moduleClass.toByteArray());
         output.close();
         
         for (Map.Entry<String, ClassWriter> inners : classBytes.functionClasses.entrySet())
         {
-            output = new FileOutputStream(String.format("/home/frengel/%s.class", inners.getKey()));
+            output = new FileOutputStream(String.format("%s.class", inners.getKey()));
             output.write(inners.getValue().toByteArray());
             output.close();
         }
