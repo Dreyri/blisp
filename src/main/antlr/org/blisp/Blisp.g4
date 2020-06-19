@@ -28,45 +28,67 @@ Port to Antlr4 by Tom Everett
 */
 grammar Blisp;
 
+// ast definition from https://www.cs.bgu.ac.il/~mira/type-inference-system/scheme-ast.rkt
+
 @header {
     package org.blisp;
 }
 
-program
-   : (fundecl | vardecl)* EOF
+scmClass
+   : (scmDefine)*
    ;
 
-fundecl
-   : LPAREN DEFINE SYMBOL list list RPAREN
+scmExp
+   : scmAtomic
+   | scmComposite
+   | scmDefine
    ;
 
-vardecl
-   : LPAREN DEFINE SYMBOL list RPAREN
+scmDefine
+   : '(' 'define' var=scmVar proc=scmProc ')'
    ;
 
-sexpr
-   : item* EOF
+scmAtomic
+   : scmVar
+   | scmNumber
    ;
 
-item
-   : atom
-   | list
-   | LPAREN item DOT item RPAREN
+scmComposite
+   : scmProc
+   | scmApp
+   | scmLet
+   | scmIf
    ;
 
-list
-   : LPAREN item* RPAREN
+scmProc
+   : '(' 'lambda' ('[' (captures+=scmVar)* ']')? '(' (args+=scmVar)* ')' expression=scmExp ')'
    ;
 
-atom
-   : STRING
-   | SYMBOL
-   | NUMBER
-   | DOT
+// application, procedure call
+scmApp
+   : '(' scmExp+ ')'
    ;
 
-DEFINE
-   : 'define'
+scmLet
+   : '(' 'let' '(' (scmBinding)* ')' scmExp ')'
+   ;
+
+scmIf
+   : '(' 'if' scmExp scmExp scmExp ')'
+   ;
+
+// things such as let bindings
+scmBinding
+   : '(' name=SYMBOL expr=scmExp ')'
+   ;
+
+// any type of variable or symbol
+scmVar
+   : SYMBOL
+   ;
+
+scmNumber
+   : NUMBER
    ;
 
 STRING
@@ -109,6 +131,9 @@ fragment SYMBOL_START
    | '*'
    | '/'
    | '.'
+   | '='
+   | '<'
+   | '>'
    ;
 
 fragment DIGIT

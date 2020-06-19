@@ -10,8 +10,20 @@ apply plugin: 'antlr'
 
 sourceCompatibility = 1.8
 
+task fatJar(type: Jar) {
+    manifest {
+        attributes 'Implementation-Title': 'Blisp compiler',
+            'Implementation-Version': version,
+            'Main-Class': 'org.blisp.Blisp'
+    }
+
+    archiveBaseName = project.name + '-all'
+    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }}
+    with jar
+}
+
 generateGrammarSource {
-    arguments << "-lib" << "src/main/antlr/org/blisp"
+    arguments << "-visitor" << "-lib" << "src/main/antlr/org/blisp"
 }
 
 repositories {
@@ -21,6 +33,7 @@ repositories {
 dependencies {
     antlr "org.antlr:antlr4:4.5"
     testImplementation('org.junit.jupiter:junit-jupiter:5.5.2')
+    compile group: 'org.ow2.asm', name: 'asm', version: '7.2'
 }
 
 test {

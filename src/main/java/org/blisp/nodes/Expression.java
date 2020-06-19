@@ -1,7 +1,12 @@
 package org.blisp.nodes;
 
-import org.blisp.Environment;
+import org.blisp.SymbolTable;
+import org.objectweb.asm.MethodVisitor;
 
-public interface Expression {
-    void compile(Environment env);
+import java.util.List;
+
+public interface Expression extends Node {    
+    void extractClosures(List<Procedure> closures);
+    
+    void codeGen(MethodVisitor currentMethod, List<Procedure> globalFunctions, SymbolTable symbols);
 }

@@ -1,9 +1,22 @@
 ;; check if we can properly define functions
-(define main () (quote ()))
+;;(define hello
+;;    (lambda (x y) 5))
 
-(define say-hello (name) (quote ()))
+;;(define main
+;;    (lambda ()
+;;        (let ((x 4))
+;;            (lambda [x] () (hello x 5)))))
+(define main
+    (lambda ()
+        (applyover100 (lambda (x) (println x)) 50)))
 
-(define add (a b) (quote ()))
 
-(define hello
-    (lambda (x y)))
+(define recurse
+    (lambda (x)
+        (if (< x 50) (recurse (+ 1 x)) (println x))))
+
+(define applyover100
+    (lambda (fn x)
+        (if (>= x 100)
+            (fn x)
+            (self fn (+ x 1)))))
