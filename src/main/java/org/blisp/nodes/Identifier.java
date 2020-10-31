@@ -5,6 +5,7 @@ import java.util.List;
 import com.sun.org.apache.bcel.internal.generic.ILOAD;
 import org.blisp.CodeGenContext;
 import org.blisp.IScope;
+import org.blisp.Symbol;
 import org.blisp.SymbolTable;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
@@ -26,9 +27,9 @@ public class Identifier implements Atomic {
 
     @Override
     public void codeGen(MethodVisitor currentMethod, List<Procedure> globalFunctions, SymbolTable symbols) {
-        Integer register = symbols.lookup(name);
-        assert register != null : "Identifier not found";
+        Symbol sym = symbols.lookup(name);
+        assert sym != null : "Identifier not found";
         
-        currentMethod.visitVarInsn(Opcodes.ALOAD, register.intValue());
+        sym.load(currentMethod);
     }
 }

@@ -30,24 +30,27 @@ public class SymbolTable {
      *
      * @return gives back the register assigned to the current symbol
      */
-    public int pushSymbol(String sym)
+    public Symbol pushLocal(String ident)
     {
-        int register = scopes.getLast().push(sym);
-        return register;
+        return scopes.getLast().pushLocal(ident);
     }
     
-    public Integer lookup(String localName)
+    public Symbol pushField(String fieldName, String className)
     {
-        for(Scope scope : scopes)
+        return scopes.getLast().pushField(fieldName, className);
+    }
+    
+    public Symbol lookup(String ident)
+    {
+        for (Scope scope : scopes)
         {
-            Integer value = scope.get(localName);
-            if (value != null)
+            Symbol sym = scope.get(ident);
+            if (sym != null)
             {
-                return value;
+                return sym;
             }
         }
-
-        // not found in local scope
+        
         return null;
     }
 }

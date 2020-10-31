@@ -1,9 +1,6 @@
 package org.blisp.nodes;
 
-import org.blisp.CodeGenContext;
-import org.blisp.IFn;
-import org.blisp.SymbolTable;
-import org.blisp.TypeException;
+import org.blisp.*;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 
@@ -114,12 +111,12 @@ public class Application implements Composite {
                 }
                 default:
                     Procedure calledProc = null;
+
+                    Symbol hofSym = symbols.lookup(fn.name);
                     
-                    Integer hofRegister = symbols.lookup(fn.name);
-                    if (hofRegister != null)
+                    if (hofSym != null)
                     {
-                        // push hof to the stack
-                        currentMethod.visitVarInsn(Opcodes.ALOAD, hofRegister.intValue());
+                        hofSym.load(currentMethod);
                         currentMethod.visitTypeInsn(Opcodes.CHECKCAST, "org/blisp/AFn");
 
                         StringBuilder description = new StringBuilder();

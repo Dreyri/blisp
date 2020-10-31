@@ -1,49 +1,16 @@
 package org.blisp;
 
-public abstract class Symbol extends AFn {
-    private String name;
-    //private Type type;
-    private boolean isGlobal;
-    private IScope scope;
+import org.objectweb.asm.ClassWriter;
+import org.objectweb.asm.MethodVisitor;
 
-    public Symbol(String name, boolean global, IScope scope) {
-        this.name = name;
-        this.isGlobal = global;
-        //this.type = null;
-        this.scope = scope;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    /*
-    public Type getType()
+public abstract class Symbol {
+    public String identifier;
+    
+    public Symbol(String identifier)
     {
-        return type;
+        this.identifier = identifier;
     }
-
-    public void setType(Type type)
-    {
-        this.type = type;
-    }
-     */
-
-    public IScope getScope()
-    {
-        return scope;
-    }
-
-    public boolean isGlobal() {
-        return isGlobal;
-    }
-
-    /*
-    public boolean hasType()
-    {
-        return getType() != null;
-    }
-
-     */
-
+    
+    public abstract void load(MethodVisitor mv);
+    public abstract void store(MethodVisitor mv);
 }

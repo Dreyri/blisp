@@ -51,7 +51,6 @@ public class Class {
         {
             String lambdaName = String.format("__lambda_%d", i);
             definedLambdas.add(new Define(new Identifier(lambdaName), anonymousLambdas.get(i)));
-
         }
         
         ArrayList<Procedure> globalFunctions = new ArrayList<>();

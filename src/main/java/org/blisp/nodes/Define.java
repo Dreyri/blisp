@@ -56,7 +56,7 @@ public class Define {
             MethodVisitor main = parentCw.visitMethod(Opcodes.ACC_PUBLIC + Opcodes.ACC_STATIC + Opcodes.ACC_VARARGS, "main", "([Ljava/lang/String;)V", null, null);
             main.visitCode();
             symbolTable.pushScope();
-            symbolTable.pushSymbol("__args");
+            symbolTable.pushLocal("__args");
             main.visitTypeInsn(Opcodes.NEW, moduleName);
             main.visitInsn(Opcodes.DUP);
             main.visitMethodInsn(Opcodes.INVOKESPECIAL, moduleName, "<init>", "()V", false);
@@ -71,16 +71,30 @@ public class Define {
             return null;
         }
         else {
-            //parentCw.visitInnerClass(proc.path, className, proc.assignedName, Opcodes.ACC_PUBLIC + Opcodes.ACC_STATIC);
+            symbolTable.pushScope();
             ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_MAXS);
             cw.visit(Opcodes.V1_6, Opcodes.ACC_PUBLIC + Opcodes.ACC_SUPER, className, null, "org/blisp/AFn", null);
-
+            
             {
-                assert proc.captures.length == 0 : "Doesn't handle captures yet, they will be implemented as simple fields";
-                MethodVisitor constructor = cw.visitMethod(Opcodes.ACC_PUBLIC, "<init>", "()V", null, null);
+                StringBuilder initSigBuilder = new StringBuilder(64);
+                initSigBuilder.append('(');
+                for (Identifier capture : this.proc.captures)
+                {
+                    cw.visitField(0, capture.name, "Ljava/lang/Object;", null, null);
+                    initSigBuilder.append("Ljava/lang/Object;");
+                }
+                initSigBuilder.append(")V");
+
+                MethodVisitor constructor = cw.visitMethod(Opcodes.ACC_PUBLIC, "<init>", initSigBuilder.toString(), null, null);
                 constructor.visitCode();
                 constructor.visitVarInsn(Opcodes.ALOAD, 0);
                 constructor.visitMethodInsn(Opcodes.INVOKESPECIAL, "org/blisp/AFn", "<init>", "()V", false);
+                for (int i = 0; i < this.proc.captures.length; ++i)
+                {
+                    constructor.visitVarInsn(Opcodes.ALOAD, 0);
+                    constructor.visitVarInsn(Opcodes.ALOAD, i + 1);
+                    constructor.visitFieldInsn(Opcodes.PUTFIELD, className, this.proc.captures[i].name, "Ljava/lang/Object;");
+                }
                 constructor.visitInsn(Opcodes.RETURN);
                 constructor.visitMaxs(0, 0);
                 constructor.visitEnd();
@@ -107,7 +121,7 @@ public class Define {
                 // push all locals into symboltable
                 for (Identifier arg : proc.arguments)
                 {
-                    symbolTable.pushSymbol(arg.name);
+                    symbolTable.pushLocal(arg.name);
                 }
 
                 Procedure self = new Procedure(proc.captures, proc.arguments, proc.expression);
@@ -124,46 +138,33 @@ public class Define {
                 invokeStatic.visitMaxs(0, 0);
                 invokeStatic.visitEnd();
             }
-
+            
             // generate the non static invoke method
-            if (this.proc.captures.length == 0)
+            // invoke through invokeStatic
+            StringBuilder description = new StringBuilder();
+            description.append('(');
+            for (int i = 0; i < this.proc.arguments.length; ++i)
             {
-                // invoke through invokeStatic
-                StringBuilder description = new StringBuilder();
-                description.append('(');
-                for (int i = 0; i < this.proc.arguments.length; ++i)
-                {
-                    description.append("Ljava/lang/Object;");
-                }
-                description.append(")Ljava/lang/Object;");
-                MethodVisitor invoke = cw.visitMethod(Opcodes.ACC_PUBLIC, "invoke", description.toString(), null, null);
-                invoke.visitCode();
-
-                symbolTable.pushScope();
-                symbolTable.pushSymbol("self");
-                for (Identifier arg : this.proc.arguments)
-                {
-                    symbolTable.pushSymbol(arg.name);
-                }
-                
-                this.proc.expression.codeGen(invoke, globalFunctions, symbolTable);
-
-                /*
-                for (int i = 0; i < this.proc.arguments.length; ++i)
-                {
-                    // this is aload0
-                    invoke.visitVarInsn(Opcodes.ALOAD, i+1);
-                }
-                invoke.visitMethodInsn(Opcodes.INVOKESTATIC, this.proc.path, "invokeStatic", description.toString(), false);
-                 */
-                invoke.visitInsn(Opcodes.ARETURN);
-                invoke.visitMaxs(0, 0);
-                invoke.visitEnd();
+                description.append("Ljava/lang/Object;");
             }
-            else {
-                assert false : "Not implemented";
+            description.append(")Ljava/lang/Object;");
+            MethodVisitor invoke = cw.visitMethod(Opcodes.ACC_PUBLIC, "invoke", description.toString(), null, null);
+            invoke.visitCode();
+
+            symbolTable.pushScope();
+            symbolTable.pushLocal("self");
+            for (Identifier arg : this.proc.arguments)
+            {
+                symbolTable.pushLocal(arg.name);
             }
 
+            this.proc.expression.codeGen(invoke, globalFunctions, symbolTable);
+            symbolTable.popScope();
+            invoke.visitInsn(Opcodes.ARETURN);
+            invoke.visitMaxs(0, 0);
+            invoke.visitEnd();
+
+            symbolTable.popScope();
             cw.visitEnd();
             return cw;
         }
